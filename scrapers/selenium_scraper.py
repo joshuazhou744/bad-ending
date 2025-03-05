@@ -1,15 +1,15 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import time
-import requests
 import os
 import random
+import csv
 
 first_names = [
     "James", "John", "Robert", "Michael", "William", 
@@ -116,18 +116,31 @@ def search_and_scrape_nsopw(first_name, last_name, url, length, page_number):
 
     return results
 
+def save_people_to_csv(people, filename="people.csv"):
+    file_exists = os.path.exists(filename)
+
+    with open(filename, mode="a", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(["Name", "Link", "Image Source"])
+        for person in people:
+            writer.writerow([person.name, person.link, person.img_src])
+    print(f"Appended {len(people)} records to {filename}")
+
 if __name__ == '__main__':
     
     # INPUTS
-    first_name = random.choice(first_names)
+    first_name = random.choice(first_names) # write names or get random names
     last_name = random.choice(last_names)
-    length = "25" # length of search results; 5, 10, 15, 25, 50, 100
-    page_number = 4 # page number of search results starting from 1
+    length = "100" # length of search results; 5, 10, 15, 25, 50, 100
+    page_number = 1 # page number of search results starting from 1
 
     if page_number < 1:
         raise ValueError("Page number must be greater than 0")
 
     url = "https://www.nsopw.gov/search-public-sex-offender-registries"
     person_list = search_and_scrape_nsopw(first_name, last_name, url, length, page_number)
-    for person in person_list:
-        print(person)
+    #for person in person_list:
+    #   print(person)
+
+    save_people_to_csv(person_list)
