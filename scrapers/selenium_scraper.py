@@ -10,6 +10,14 @@ import time
 import os
 import random
 import csv
+import requests
+
+import pymongo
+import gridfs
+from dotenv import load_dotenv
+
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
 
 first_names = [
     "James", "John", "Robert", "Michael", "William", 
@@ -127,6 +135,32 @@ def save_people_to_csv(people, filename="people.csv"):
             writer.writerow([person.name, person.link, person.img_src])
     print(f"Appended {len(people)} records to {filename}")
 
+def save_people_to_mongodb(people, mongo_uri, db_name, collection_name):
+    client = pymongo.MongoClient(mongo_uri)
+    db = client[db_name]
+    fs = gridfs.GridFS(db)
+    collection = db[collection_name]
+
+    for person in people:
+        image_id = None
+        if person.img_src:
+            try:
+                response = requests.get(person.img_src, timeout=10)
+                response.raise_for_status()
+                image_data = response.content
+                filename = os.path.basename(person.img_src.split("?")[0])
+                image_id = fs.put(image_data, filename=filename)
+                print("stored image")
+            except Exception as e:
+                print(f"error downloading/storing image: {e}")
+        doc = {
+            "name": person.name,
+            "link": person.link,
+            "image_id": image_id
+        }
+        collection.insert_one(doc)
+    print(f"Inserted {len(people)} records to {db_name}.{collection_name}")
+
 if __name__ == '__main__':
     
     # INPUTS
@@ -143,4 +177,8 @@ if __name__ == '__main__':
     #for person in person_list:
     #   print(person)
 
-    save_people_to_csv(person_list)
+    DB_NAME = "face_recognition_db"
+    COLLECTION_NAME = "persons"
+    
+    # Store the Person objects in MongoDB
+    save_people_to_mongodb(person_list, MONGO_URI, DB_NAME, COLLECTION_NAME)
