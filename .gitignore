@@ -2,3 +2,5 @@
 scrapers/people.csv
 recognition/haarcascade_frontalface_default.xml
 recognition/images/*
+recognition/recognizer.yml
+recognition/label_mapping.pkl
