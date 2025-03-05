@@ -1,3 +1,3 @@
 .env
-./scrapers/people.csv
-./recognition/haarcascade_frontalface_default.xml
+scrapers/people.csv
+recognition/haarcascade_frontalface_default.xml
