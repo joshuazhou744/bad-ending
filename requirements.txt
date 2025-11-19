@@ -4,7 +4,8 @@ bs4
 beautifulsoup4
 requests
 pymongo
-gridfs
 dotenv
 numpy
 opencv-contrib-python
+insightface
+onnxruntime

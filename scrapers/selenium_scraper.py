@@ -58,6 +58,7 @@ def search_and_scrape_nsopw(first_name, last_name, url, length, page_number):
     firstname_input.send_keys(first_name)
     lastname_input.clear()
     lastname_input.send_keys(last_name)
+    print(f"search for {first_name} {last_name}")
 
     search_button = driver.find_element(By.ID, "searchbynamezip")
     search_button.click()
@@ -142,6 +143,9 @@ def save_people_to_mongodb(people, mongo_uri, db_name, collection_name):
     collection = db[collection_name]
 
     for person in people:
+        if collection.find_one({"link": person.link}):
+            print("Duplicate found, skipping:", person.link)
+            continue
         image_id = None
         if person.img_src:
             try:
